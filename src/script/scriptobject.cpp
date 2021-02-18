@@ -250,7 +250,7 @@ double ScriptObject::get(const QString& indicator)
     return get(baseValues.currentPair.symbolSecond(), indicator);
 }
 
-void ScriptObject::timerCreate(int milliseconds, const QString& command, bool once)
+void ScriptObject::timerCreate(int milliseconds, const QString& command, bool once, int times)
 {
     if (testMode)
         return;
@@ -269,30 +269,43 @@ void ScriptObject::timerCreate(int milliseconds, const QString& command, bool on
     newTimer->setSingleShot(once);
     newTimer->setProperty("Command", command);
     newTimer->setProperty("DeleteMe", once);
+    newTimer->setProperty("times", times);
+    newTimer->setProperty("currentIteration", 0);
     connect(newTimer, SIGNAL(timeout()), this, SLOT(timerOut()));
     newTimer->start(milliseconds);
 }
 
+
 void ScriptObject::delay(double seconds, const QString& command)
 {
-    timerCreate(seconds * 1000, command, true);
+    timerCreate(seconds * 1000, command, true, 0);
 }
 
-void ScriptObject::timer(double seconds, const QString& command)
+void ScriptObject::timer(double seconds, const QString& command, int times)
 {
-    timerCreate(seconds * 1000, command, false);
+    timerCreate(seconds * 1000, command, false, times);
 }
 
 void ScriptObject::timerOut()
 {
     QTimer* senderTimer = qobject_cast<QTimer*>(sender());
 
+    int times = senderTimer->property("times").toInt();
+    int currentIteration = senderTimer->property("currentIteration").toInt();
+    currentIteration++;
+    senderTimer->setProperty("currentIteration", currentIteration);
+
+    //emit writeLog(&"Timer currentIteration: " [currentIteration] );
+
+
+
+
     if (senderTimer == nullptr)
         return;
 
     QString command = senderTimer->property("Command").toString();
 
-    if (senderTimer->property("DeleteMe").toBool())
+    if (senderTimer->property("DeleteMe").toBool() || (times == currentIteration))
     {
         timerMap.remove(senderTimer);
         senderTimer->deleteLater();

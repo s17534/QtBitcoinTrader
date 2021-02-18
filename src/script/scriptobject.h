@@ -66,7 +66,7 @@ private:
     void initValueChangedPrivate(const QString& symbol, QString& scriptNameInd, double& val, bool forceEmit = false);
     void deleteEngine();
     bool scriptWantsOrderBookData;
-    void timerCreate(int milliseconds, const QString& command, bool once);
+    void timerCreate(int milliseconds, const QString& command, bool once, int times);
     QMap<QTimer*, bool> timerMap;
     double orderBookInfo(const QString& symbol, double& value, bool isAsk, bool getPrice);
     bool haveTimer;
@@ -91,7 +91,7 @@ private:
 public slots:
     void sendEvent(const QString& symbol, const QString& name, double value);
     void sendEvent(const QString& name, double value);
-    void timer(double seconds, const QString& _command_);
+    void timer(double seconds, const QString& _command_, int times);
     void delay(double seconds, const QString& _command_);
     void log(const QVariant&);
     void log(const QVariant&, const QVariant&);
